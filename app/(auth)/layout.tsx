@@ -4,6 +4,8 @@ import React, { ReactNode } from 'react'
 
 const AuthLayout = async ({children}: {children: ReactNode}) => {
 
+  /************************* IMAGE PRESENT FOR FIREBASE AUTHENTICATION*************************/
+
   const isUserAuthenticated = await isAuthenticated()
     if(isUserAuthenticated) redirect('/')
 

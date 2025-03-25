@@ -6,12 +6,12 @@ import { cookies } from "next/headers"
 const ONE_WEEK = 60 * 60 * 24 * 7
 export async function signUp(params: SignUpParams) {
   const { uid, name, email } = params
-  
+
   try {
-    
+
     const userRecord = await db.collection('users').doc(uid).get()
 
-    if(userRecord.exists){
+    if (userRecord.exists) {
       return {
         success: false,
         message: 'User already exists. Please sign in instead.'
@@ -30,8 +30,8 @@ export async function signUp(params: SignUpParams) {
   } catch (error: any) {
     console.log("Error signing up:", error);
 
-    if(error.code === 'auth/email-already-exists'){
-      return{
+    if (error.code === 'auth/email-already-exists') {
+      return {
         success: false,
         message: 'Email already exists. Please sign in instead.'
       }
@@ -50,7 +50,7 @@ export async function signIn(params: SignInParams) {
   try {
     const userRecord = await auth.getUserByEmail(email)
 
-    if(!userRecord){
+    if (!userRecord) {
       return {
         success: false,
         message: 'User not found. Please sign up instead.'
@@ -64,7 +64,7 @@ export async function signIn(params: SignInParams) {
   }
 }
 
-export async function setSessionCookie(idToken: string){
+export async function setSessionCookie(idToken: string) {
   const cookieStore = await cookies()
 
   const sessionCookie = await auth.createSessionCookie(idToken, { expiresIn: ONE_WEEK * 1000 }) // 7 days
@@ -78,11 +78,11 @@ export async function setSessionCookie(idToken: string){
   })
 }
 
-export async function getCurrentUser(): Promise<User | null>{
+export async function getCurrentUser(): Promise<User | null> {
   const cookieStore = await cookies()
   const sessionCookie = cookieStore.get('session')?.value
 
-  if(!sessionCookie) return null
+  if (!sessionCookie) return null
 
   try {
     // to check whether we have a valid session cookie
@@ -90,7 +90,7 @@ export async function getCurrentUser(): Promise<User | null>{
 
     const userRecord = await db.collection('users').doc(decodedClaims.uid).get()
 
-    if(!userRecord.exists) return null
+    if (!userRecord.exists) return null
 
     return {
       ...userRecord.data(),
@@ -103,9 +103,42 @@ export async function getCurrentUser(): Promise<User | null>{
   }
 }
 
-export async function isAuthenticated(){  
+export async function isAuthenticated() {
   const user = await getCurrentUser()
 
   return !!user; // if user is not null, return true . Ex: '' => false, !'' => true, !(!'') => false
   // Therefore using '!!' we can turn existence or non existence of user to a boolean value 
+}
+
+export async function getInterviewByUserId(userId: string): Promise<Interview[] | null> {
+
+  if (!userId) return null;
+
+  const interviews = await db
+    .collection('interviews')
+    .where('userId', '==', userId)
+    .orderBy('createdAt', 'desc')
+    .get()
+
+  return interviews.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data()
+  })) as Interview[]
+}
+
+export async function getLatestInterviews(params: GetLatestInterviewsParams): Promise<Interview[] | null> {
+  const { userId, limit = 20 } = params
+
+  const interviews = await db
+    .collection('interviews')
+    .orderBy('createdAt', 'desc')
+    .where('finalized', '==', true)
+    .where('userId', '!=', userId)
+    .limit(limit)
+    .get()    
+
+  return interviews.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data()
+  })) as Interview[]
 }
