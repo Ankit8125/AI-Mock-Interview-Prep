@@ -2,6 +2,7 @@
 
 import { auth, db } from "@/firebase/admin"
 import { cookies } from "next/headers"
+import { redirect } from "next/navigation"
 
 const ONE_WEEK = 60 * 60 * 24 * 7
 export async function signUp(params: SignUpParams) {
@@ -108,5 +109,10 @@ export async function isAuthenticated() {
 
   return !!user; // if user is not null, return true . Ex: '' => false, !'' => true, !(!'') => false
   // Therefore using '!!' we can turn existence or non existence of user to a boolean value 
+}
+
+export async function signOut() {
+  const cookieStore = await cookies()
+  cookieStore.delete('session')
 }
 

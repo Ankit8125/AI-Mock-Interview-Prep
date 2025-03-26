@@ -94,9 +94,9 @@ const AuthForm = ({ type }: { type: FormType }) => {
   return (
     <div className="card-border lg:min-w-[566px]">
       <div className="flex flex-col gap-6 card py-14 px-10">
-        <div className="flex flex-row gap-2 justify-center">
-          <Image src="/logo.svg" alt='logo' width={32} height={38} />
-          <h2 className="text-primary-100">InterviewPrep</h2>
+        <div className="flex flex-row justify-center items-center">
+          <Image src="/logo.svg" alt='logo' width={100} height={100} />
+          <h2 className="text-primary-100 text-center">InterviewPrep</h2>
         </div>
         <h3>Practice job interview with AI</h3>
         <Form {...form}>
